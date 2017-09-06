@@ -136,6 +136,7 @@ public class MiddleVersionController extends CompatController {
                     mFlashlightEnabled = true;
                 }
             } else {
+                //TODO 这个地方是一个非常关键的地方就是使用系统的api关闭手电筒，千万别去释放资源，如果你去释放资源的话，第二次打开的话速度不快的。
                 if (mFlashlightRequest != null) {
                     CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
                     builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
@@ -147,6 +148,7 @@ public class MiddleVersionController extends CompatController {
                 }
             }
             if (forceDisable) {
+                //TODO 记住这里需要进行强制释放资源的，因为如果不去释放资源的话，如果去打开别人的手电筒或者是相机的话是打不开的，提示被占用了
                 if (mCameraDevice != null) {
                     mCameraDevice.close();
                 }
