@@ -99,7 +99,7 @@ Camera.open()，之后又把这个camera去释放，这样子的话则会导致�
 
 **博客地址**
 
-CSDN地址：http://blog.csdn.net/u012417984/article/details/77542594
+CSDN地址：http://blog.csdn.net/u012417984/article/details/77542594</br>
 体验地址：https://fir.im/h1kt?release_id=59afc379548b7a34400000a9
 
 **效果图

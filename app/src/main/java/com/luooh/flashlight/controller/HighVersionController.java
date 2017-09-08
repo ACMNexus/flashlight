@@ -14,6 +14,9 @@ import android.util.Log;
 @TargetApi(Build.VERSION_CODES.M)
 public class HighVersionController extends CompatController {
 
+    private boolean pendingError = false;
+    private MiddleVersionController mController;
+
     protected HighVersionController(Context context) {
         super(context);
         initialize();
@@ -25,19 +28,28 @@ public class HighVersionController extends CompatController {
         if (mCameraId != null) {
             mCameraManager.registerTorchCallback(mTorchCallback, mHandler);
         }
+
+        mController = new MiddleVersionController(mContext);
     }
 
     @Override
     public void setFlashlight(boolean enabled) {
-        boolean pendingError = false;
-        if(!TextUtils.isEmpty(mCameraId)) {
+        if(!TextUtils.isEmpty(mCameraId) && !pendingError) {
             synchronized (this) {
                 if (mFlashlightEnabled != enabled) {
-                    mFlashlightEnabled = enabled;
                     try {
+                        /**
+                         * 在有些手机，比如说我遇到的360 6.0手机上在开启手电筒的时候就会崩溃的
+                         * 当出现这种情况的时候，我们就使用MiddleVersion去开启手电筒，然后依次，
+                         * 如果Middle的方式开启手电筒失败了，则使用LowVersion方式开启手电筒
+                         */
                         mCameraManager.setTorchMode(mCameraId, enabled);
+                        mFlashlightEnabled = enabled;
                     } catch (CameraAccessException e) {
                         Log.e(TAG, "Couldn't set torch mode", e);
+                        mFlashlightEnabled = false;
+                        pendingError = true;
+                    } catch (Throwable throwable) {
                         mFlashlightEnabled = false;
                         pendingError = true;
                     }
@@ -45,10 +57,12 @@ public class HighVersionController extends CompatController {
             }
         }
 
-        dispatchModeChanged(mFlashlightEnabled);
         if (pendingError) {
-//            dispatchError();
+            mController.setFlashlight(enabled);
+            return;
         }
+
+        dispatchModeChanged(mFlashlightEnabled);
     }
 
     private void dispatchModeChanged(boolean enabled) {
